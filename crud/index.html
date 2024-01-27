@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lat backend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+  </head>
+  <body>
+    <!-- semua komponen yang ada di dalam id='crudApp' adalah vue -->
+    <div class="container mt-4" id="crudApp">
+      <h2 class="alert alert-success text-center">Crud menyimpan nama peserta dan foto</h2>
+      <div class="card">
+        <div class="card-header">
+          <!-- tombol ini jika di klik akan menampilkan modal -->
+          <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modaltambah">Tambah Data</button>
+        </div>
+        <div class="card-body">
+          <!-- table-stripted untuk membuat latar dengan tabel dengan model belang -->
+          <table class="w-100 text-center table table-striped">
+            <thead>
+              <tr class="table-dark text-capitalize text-white">
+                <th>No</th>
+                <th>nama Peserta</th>
+                <th>gambar Peserta</th>
+                <th colspan="2">aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- v-for digunakan untuk melakukan looping, seperti foreach pada php -->
+              <!-- allData adalah variabel yg berisi data dari database, bagaimana allData bisa menampung data bisa dilihat pada script fetchAllData di bagian bawah -->
+              <tr v-for="(item, index) in allData" :key="index">
+                <td>{{index+1}}</td>
+                <td>{{item.nama}}</td>
+                <td>
+                  <img :src="'upload/' + item.gambar" class="img-thumbnail" width="200" />
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modaledit" @click="editData(item.id, item.nama, item.gambar)">Edit</button>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalhapus" @click="hapusData(item.id, item.nama)">Hapus</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- modal tambah -->
+
+      <div class="modal fade" id="modaltambah" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Form Tambah</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group mb-2">
+                <label for="">Nama Peserta</label>
+                <input type="text" class="form-control" v-model="nama" required />
+              </div>
+              <div class="form-group mb-2">
+                <label for="">Gambar Peserta</label>
+                <input type="file" ref="file" class="form-control" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button class="btn btn-primary" @click="simpanData">Kirim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end modal tambah -->
+
+      <!-- modal hapus -->
+      <div class="modal fade" id="modalhapus" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Form Hapus</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="id" v-model="id" />
+              <div class="form-group mb-2">
+                <label for="">Data akan dihapus, Yakin ?</label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button class="btn btn-primary" @click="deleteData">Hapus</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end modal hapus -->
+
+      <!-- modal edit -->
+      <div class="modal fade" id="modaledit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Form Edit</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group mb-2">
+                <label for="">Nama</label>
+                <input type="text" class="form-control" v-model="nama" />
+              </div>
+              <div class="form-group mb-2">
+                <label for="">gambar</label>
+                <input type="file" class="form-control" ref="files" />
+                <img :src="'upload/' + app.file" class="img-thumbnail" width="200" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button class="btn btn-primary" @click="updateData">Kirim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end modal edit -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      // inisialisasi vue
+      var app = new Vue({
+        el: '#crudApp',
+        data: {
+          allData: '',
+          nama: '',
+          id: '',
+          file: '',
+        },
+        methods: {
+          //metode untuk menampilkan data
+          fetchAllData: function () {
+            axios
+              .post('action.php', {
+                action: 'fetchall',
+              })
+              .then(function (response) {
+                // respon adalah data yang berhasil diambil dari database
+                // respon.data adalah data yang dimasukan ke dalam variabel allData
+                // allData akan dilooping di tabel nantinya
+                app.allData = response.data;
+              });
+          },
+          //metode untuk insert data
+          simpanData: function () {
+            if (app.nama == '') {
+              alert('Isi semua data terlebih dahulu!');
+            } else {
+              app.file = app.$refs.file.files[0];
+              var formData = new FormData();
+              formData.append('file', app.file);
+              formData.append('action', 'insert'); // Menambahkan properti action
+              formData.append('nama', app.nama); // Menambahkan properti nama
+
+              axios
+                .post('action.php', formData, {
+                  header: {
+                    'Content-Type': 'multipart/form-data',
+                  },
+                })
+                .then(function (response) {
+                  // Memperbarui data
+                  app.fetchAllData();
+                  // Menutup modal
+                  $('#modaltambah').modal('hide');
+                  // Mengosongkan isi form
+                  app.nama = '';
+                  // Mengosongkan isi input file
+                  app.$refs.file.value = null;
+                });
+            }
+          },
+
+          //isi form saat modal hapus tampil
+          hapusData: function (id, nama) {
+            //isi input id
+            app.id = id;
+          },
+          deleteData: function () {
+            if (app.id == '') {
+              alert('Tidak ada yang perlu dihapus!');
+            } else {
+              axios
+                .post('action.php', {
+                  action: 'delete',
+                  id: app.id,
+                })
+                .then(function (response) {
+                  //memperbarui data
+                  app.fetchAllData();
+                  //menutup modal
+                  $('#modalhapus').modal('hide');
+                });
+            }
+          },
+          editData: function (id, nama, gambar) {
+            // isi form saat modal dipanggil
+            app.id = id; // isi input data
+
+            // isi input nama depan
+            app.nama = nama;
+
+            // isi input file
+            app.file = gambar;
+          },
+
+          // metode untuk update data
+          updateData: function () {
+            if (app.id == '' || app.nama == '') {
+              alert('isi semua data terlebih dahulu');
+            } else {
+              var formData = new FormData();
+              formData.append('file', app.$refs.files.files[0]);
+              formData.append('action', 'update'); // Menambahkan properti action
+              formData.append('nama', app.nama); // Menambahkan properti nama
+              formData.append('id', app.id); // Menambahkan properti id
+              axios
+                .post('action.php', formData, {
+                  header: {
+                    'Content-Type': 'multipart/form-data',
+                  },
+                })
+                .then(function (response) {
+                  // memperbarui data
+                  app.fetchAllData();
+
+                  //menutup modal
+                  $('#modaledit').modal('hide');
+
+                  //mengosongkan isi form
+                  app.id = '';
+                  app.nama = '';
+
+                  app.$refs.files.value = null;
+                });
+            }
+          },
+        },
+
+        // semua yang ada di dalam created akan dijalankan saat pertama kali document dimuat created: function(){
+        created: function () {
+          this.fetchAllData();
+        },
+      });
+    </script>
+  </body>
+</html>
