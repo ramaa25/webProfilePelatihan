@@ -14,7 +14,7 @@ if ($received_data->action == 'fetchall') {
     $statement = $connect->prepare($query);
     $statement->execute();
     //melakukan perulangan dan memasukan tiap data ke dalam variabel data 
-    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $statement->fetch()) {
         $data[] = $row;
     }
     //menampilkan data dalam bentuk json
